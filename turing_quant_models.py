@@ -73,4 +73,41 @@ class Turing_quant_models:
         df2 = pd.concat([close_df, high_df, low_df, open_df, volume_df, open_int_df], axis=1)
 
         return df2
+
+    def parkinson_vol(high_df, low_df, period=60):
+        
+        x = np.log(np.divide(high_df, low_df)) ** 2
+        x.columns = [x[0:3] + "pv" for x in x.columns]
+
+        pv = x.copy()
+
+        const = 1 / (4 * period * np.log(2))
+
+        pv.iloc[:period, :] = np.nan
+
+        for row in range(period, len(high_df)):
+            pv.iloc[row] = np.sqrt(const * np.sum(x.iloc[row-period:row, :]))
+
+        return pv
+
+    def garman_klass_vol(high_df, low_df, close_df, open_df, period=60):
+
+        x_hl = (1/2)*(np.log(np.divide(high_df, low_df))) ** 2
+        x_co = - (2 * np.log(2) - 1) * \
+            (np.log(np.divide(close_df, open_df))**2)
+
+        x = x_hl + x_co.values
+
+        x.columns = [x[0:3] + "gk" for x in x.columns]
+
+        gk = x.copy()
+
+        const = 1/period
+
+        gk.iloc[:period, :] = np.nan
+
+        for row in range(period, len(high_df)):
+            gk.iloc[row] = np.sqrt(const * np.sum(x.iloc[row-period:row, :]))
+
+        return gk
     
