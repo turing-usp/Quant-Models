@@ -60,19 +60,6 @@ class tsmom (Turing_quant_models):
 
         return (1+np.dot(portfolio, returns_monthly.iloc[date]))
 
-    def plot_backtesting(self, returns_model, returns_baseline, label_model, label_baseline, title):
-
-        plt.figure(figsize=(16, 9))
-
-        plt.plot(100*returns_model.cumprod(), label=label_model, color='blue')
-        plt.plot(100*returns_baseline.cumprod(),
-                 label=label_baseline, color='red')
-
-        plt.yscale('log')
-        plt.legend()
-        plt.title(title)
-        plt.show()
-
     def backtesting(self, start_date, years, vol, method, plot=True):
 
         returns_model = []  # retorno do TSMOM
@@ -98,5 +85,4 @@ class tsmom (Turing_quant_models):
         if plot:
             self.plot_backtesting(
                 returns_model, returns_baseline, "TSMOM", "Long only", "Cumulative returns")
-
 

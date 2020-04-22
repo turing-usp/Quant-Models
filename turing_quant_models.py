@@ -2,10 +2,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class Turing_quant_models:
 
     def __init__(self, df):
-        
+
         close_columns = []
         high_columns = []
         low_columns = []
@@ -51,7 +52,7 @@ class Turing_quant_models:
         del(open_int_columns)
 
     def prepare_yahoo_df(df):
-        
+
         close_df = df["Close"]
         close_df.columns = df["Close"].columns + "_close"
 
@@ -70,12 +71,13 @@ class Turing_quant_models:
         open_int_df = df["Adj Close"]
         open_int_df.columns = df["Adj Close"].columns + "_open_int"
 
-        df2 = pd.concat([close_df, high_df, low_df, open_df, volume_df, open_int_df], axis=1)
+        df2 = pd.concat([close_df, high_df, low_df, open_df,
+                         volume_df, open_int_df], axis=1)
 
         return df2
 
     def parkinson_vol(high_df, low_df, period=60):
-        
+
         x = np.log(np.divide(high_df, low_df)) ** 2
         x.columns = [x[0:3] + "pv" for x in x.columns]
 
@@ -110,4 +112,16 @@ class Turing_quant_models:
             gk.iloc[row] = np.sqrt(const * np.sum(x.iloc[row-period:row, :]))
 
         return gk
-    
+
+    def plot_backtesting(self, returns_model, returns_baseline, label_model, label_baseline, title):
+
+        plt.figure(figsize=(16, 9))
+
+        plt.plot(100*returns_model.cumprod(), label=label_model, color='blue')
+        plt.plot(100*returns_baseline.cumprod(),
+                 label=label_baseline, color='red')
+
+        plt.yscale('log')
+        plt.legend()
+        plt.title(title)
+        plt.show()

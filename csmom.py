@@ -14,31 +14,33 @@ class csmom (Turing_quant_models):
         Turing_quant_models.__init__(self, df)
 
     def signal(df, date, passive, method):
-        
+
         num_assets = len(df.iloc[-1])
         signal = []
-            
+
         returns = df.pct_change(20 * 12).resample('BM').last().ffill()[:date]
-        
+
         returns_rank = rankdata(returns.iloc[-1])
 
         if passive:
             signal = np.ones(num_assets)
         else:
-            signal = np.where(returns_rank > int(num_assets * 0.7), 1, np.where(returns_rank < int(num_assets * 0.3), -1, 0))
-                
+            signal = np.where(returns_rank > int(
+                num_assets * 0.7), 1, np.where(returns_rank < int(num_assets * 0.3), -1, 0))
+
         return signal
-    
-    def csmom (self, df,returns_monthly, vol_monthly,date, method = 'momentum', risk=0.4, passive=False, momentum_window=12):
-        
-        position = self.signal(df, date, passive, method)
-            
-        weights = (risk / vol_monthly.iloc[date-1])
-        
-        weights /= len(weights)
-        
+
+    def csmom(self, df, returns_monthly, vol_monthly, date, method='momentum', risk=0.4, passive=False, momentum_window=12):
+
+        position = signal(df, date)
+
+        num_assets = len(df.iloc[-1])
+
+        weights = 1 / (int(num_assets - num_assets * 0.8) +
+                       int(num_assets * 0.2))
+
         portfolio = position * weights
-        
+
         return (1+np.dot(portfolio, returns_monthly.iloc[date]))
 
     def backtesting(self, start_date, years, vol, method, plot=True):
