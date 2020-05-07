@@ -1,4 +1,4 @@
-# Turing_Quant_Models
+# Turing-Quant-Models
 
 Turing Quant library
 
