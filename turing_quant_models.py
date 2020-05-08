@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from sklearn.linear_model import LinearRegression
+from sklearn.tree         import DecisionTreeRegressor
+from sklearn.ensemble     import RandomForestRegressor
+
 
 class Turing_quant_models:
 
@@ -77,40 +81,55 @@ class Turing_quant_models:
         return df2
 
     def parkinson_vol(high_df, low_df, period=60):
-
+        """
+        Estimando a volatilidade a partir dos preço de Alta e de Baixa
+        """
+        
+        # Calculando parcela interna da somatoria
         x = np.log(np.divide(high_df, low_df)) ** 2
         x.columns = [x[0:3] + "pv" for x in x.columns]
-
+        
+        # Criando dataframe para atribuir as volatilidades
         pv = x.copy()
-
+        
+        # Termo constante fora da somatoria (Considerando vol diaria)
         const = 1 / (4 * period * np.log(2))
-
-        pv.iloc[:period, :] = np.nan
-
+        
+        # Atribuindo not a number, para os valores iniciais
+        pv.iloc[:period,:] = np.nan
+            
+        # iteração do centro de massa da vol
         for row in range(period, len(high_df)):
-            pv.iloc[row] = np.sqrt(const * np.sum(x.iloc[row-period:row, :]))
-
+            pv.iloc[row] = np.sqrt(const * np.sum(x.iloc[row-period:row,:]))
+            
         return pv
 
     def garman_klass_vol(high_df, low_df, close_df, open_df, period=60):
-
+        """
+        Estima a volatilidade a partir dos seguintes preços: alta, baixa, abertura e fechamento
+        """
+        # Calculando parcelas internas da somatoria
         x_hl = (1/2)*(np.log(np.divide(high_df, low_df))) ** 2
-        x_co = - (2 * np.log(2) - 1) * \
-            (np.log(np.divide(close_df, open_df))**2)
-
+        x_co = - (2 * np.log(2) - 1)* (np.log(np.divide(close_df, open_df))**2)
+        
+        # Somando parcelas calculadas
         x = x_hl + x_co.values
-
+        
         x.columns = [x[0:3] + "gk" for x in x.columns]
-
+        
+        # Criando dataframe para atribuir as volatilidades
         gk = x.copy()
-
+        
+        # Termo constante fora da somatoria (Considerando vol diaria)
         const = 1/period
-
-        gk.iloc[:period, :] = np.nan
-
+        
+        # Atribuindo not a number, para os valores iniciais
+        gk.iloc[:period,:] = np.nan
+        
+        # iteração do centro de massa da vol
         for row in range(period, len(high_df)):
-            gk.iloc[row] = np.sqrt(const * np.sum(x.iloc[row-period:row, :]))
-
+            gk.iloc[row] = np.sqrt(const * np.sum(x.iloc[row-period:row,:]))
+            
         return gk
 
     def plot_backtesting(self, returns_model, returns_baseline, label_model, label_baseline, title):
@@ -125,3 +144,24 @@ class Turing_quant_models:
         plt.legend()
         plt.title(title)
         plt.show()
+
+    def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+        """
+        Call in a loop to create terminal progress bar
+        @params:
+            iteration   - Required  : current iteration (Int)
+            total       - Required  : total iterations (Int)
+            prefix      - Optional  : prefix string (Str)
+            suffix      - Optional  : suffix string (Str)
+            decimals    - Optional  : positive number of decimals in percent complete (Int)
+            length      - Optional  : character length of bar (Int)
+            fill        - Optional  : bar fill character (Str)
+            printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+        """
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+        filledLength = int(length * iteration // total)
+        bar = fill * filledLength + '-' * (length - filledLength)
+        print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+        # Print New Line on Complete
+        if iteration == total: 
+            print()
