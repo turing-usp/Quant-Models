@@ -3,6 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pandas_datareader import data
 
+from sklearn.linear_model import LinearRegression
+from sklearn.tree         import DecisionTreeRegressor
+from sklearn.ensemble     import RandomForestRegressor
+
 from turing_quant_models import Turing_quant_models
 
 
@@ -92,7 +96,7 @@ class tsmom (Turing_quant_models):
                 
                 lr = LinearRegression()
                 
-                signal = ml_signal(lr, prices)
+                signal = self.ml_signal(lr, prices)
                 
             elif method == "decision_tree":
                 
@@ -100,7 +104,7 @@ class tsmom (Turing_quant_models):
                 
                 dt = DecisionTreeRegressor()
                 
-                signal = ml_signal(dt, prices)
+                signal = self.ml_signal(dt, prices)
                 
             elif method == "random_forest":
                 
@@ -108,7 +112,7 @@ class tsmom (Turing_quant_models):
                 
                 rf = RandomForestRegressor()
                 
-                signal = ml_signal(rf, prices)
+                signal = self.ml_signal(rf, prices)
                             
         return signal
 
@@ -134,7 +138,7 @@ class tsmom (Turing_quant_models):
 
         for i in range(start, end):
 
-            self.printProgressBar (iteration=i-start, total=end-start-1)
+            self.printProgressBar (i-start, end-start-1)
 
             returns_model.append(self.tsmom(self.close_df, self.returns_monthly,
                                             self.vol_monthly, i))

@@ -1,61 +1,57 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
-from sklearn.linear_model import LinearRegression
-from sklearn.tree         import DecisionTreeRegressor
-from sklearn.ensemble     import RandomForestRegressor
-
+import yfinance as yf
 
 class Turing_quant_models:
 
-    def __init__(self, df):
+    def __init__(self, df, isDataReader=True):
 
-        close_columns = []
-        high_columns = []
-        low_columns = []
-        open_columns = []
-        volume_columns = []
-        open_int_columns = []
+        if (isDataReader):
+            self.close_df = df["Close"]
+            self.high_df = df["High"]
+            self.low_df = df["Low"]
+            self.open_df = df["Open"]
+            self.volume_df = df["Volume"]
+            self.open_int_df = df["Adj Close"]
 
-        for i in df.columns:
-            if "close" in i:
-                close_columns.append(i)
-            elif "high" in i:
-                high_columns.append(i)
-            elif "low" in i:
-                low_columns.append(i)
-            elif "open_int" in i:
-                open_int_columns.append(i)
-            elif "open" in i:
-                open_columns.append(i)
-            elif "volume" in i:
-                volume_columns.append(i)
+        else:
+            close_columns = []
+            high_columns = []
+            low_columns = []
+            open_columns = []
+            volume_columns = []
+            open_int_columns = []
 
-        self.close_df = df[close_columns]
-        self.high_df = df[high_columns]
-        self.low_df = df[low_columns]
-        self.open_df = df[open_columns]
-        self.volume_df = df[volume_columns]
-        self.open_int_df = df[open_int_columns]
+            for i in df.columns:
+                if "close" in i:
+                    close_columns.append(i)
+                elif "high" in i:
+                    high_columns.append(i)
+                elif "low" in i:
+                    low_columns.append(i)
+                elif "open_int" in i:
+                    open_int_columns.append(i)
+                elif "open" in i:
+                    open_columns.append(i)
+                elif "volume" in i:
+                    volume_columns.append(i)
+
+            self.close_df = df[close_columns]
+            self.high_df = df[high_columns]
+            self.low_df = df[low_columns]
+            self.open_df = df[open_columns]
+            self.volume_df = df[volume_columns]
+            self.open_int_df = df[open_int_columns]
 
         self.returns_daily = self.close_df.pct_change()
-        self.returns_monthly = self.close_df.pct_change(
-            20).dropna().resample('BM').last().ffill()
+        self.returns_monthly = self.close_df.pct_change(20).dropna().resample('BM').last().ffill()
 
-        self.vol_daily = self.returns_daily.ewm(
-            adjust=True, com=60, min_periods=0).std().dropna()
-        self.vol_monthly = (
-            np.sqrt(261)*self.vol_daily).resample('BM').last().ffill()
+        # EWMA por padrão
+        self.vol_daily = self.returns_daily.ewm(adjust=True, com=60, min_periods=0).std().dropna()
+        self.vol_monthly = (np.sqrt(261)*self.vol_daily).resample('BM').last().ffill()
 
-        del(close_columns)
-        del(high_columns)
-        del(low_columns)
-        del(open_columns)
-        del(volume_columns)
-        del(open_int_columns)
-
-    def prepare_yahoo_df(df):
+    def prepare_yahoo_df(self, df):
 
         close_df = df["Close"]
         close_df.columns = df["Close"].columns + "_close"
@@ -80,7 +76,7 @@ class Turing_quant_models:
 
         return df2
 
-    def parkinson_vol(high_df, low_df, period=60):
+    def parkinson_vol(self, high_df, low_df, period=60):
         """
         Estimando a volatilidade a partir dos preço de Alta e de Baixa
         """
@@ -104,7 +100,7 @@ class Turing_quant_models:
             
         return pv
 
-    def garman_klass_vol(high_df, low_df, close_df, open_df, period=60):
+    def garman_klass_vol(self, high_df, low_df, close_df, open_df, period=60):
         """
         Estima a volatilidade a partir dos seguintes preços: alta, baixa, abertura e fechamento
         """
@@ -132,7 +128,7 @@ class Turing_quant_models:
             
         return gk
 
-    def plot_backtesting(self, returns_model, returns_baseline, label_model, label_baseline, title):
+    def plot_backtesting(self, returns_model, returns_baseline, label_model="Model", label_baseline="Baseline", title="Cumulative returns"):
 
         plt.figure(figsize=(16, 9))
 
@@ -145,7 +141,7 @@ class Turing_quant_models:
         plt.title(title)
         plt.show()
 
-    def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    def printProgressBar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
         """
         Call in a loop to create terminal progress bar
         @params:
