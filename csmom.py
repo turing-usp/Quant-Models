@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pandas_datareader import data
 from scipy.stats import rankdata
 
 from turing_quant_models import Turing_quant_models

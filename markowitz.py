@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pandas_datareader import data
 
 from turing_quant_models import Turing_quant_models
 
@@ -13,12 +12,9 @@ class markowitz (Turing_quant_models):
         Turing_quant_models.__init__(self, df)
 
     def markowitz(self, returns_monthly, date, min_weight=0.1, max_weight=0.7, method="sharpe",
-                  num_portfolios=5000, risk_free=0):
+                  num_portfolios=5000, risk_free=0, plotProgress=False, plotEfficient=False):
 
-        ewma = self.returns_monthly.ewm(
-            adjust=True, com=252, min_periods=0).mean()
-
-        exp_return = ewma.iloc[-1]
+        exp_return = returns_monthly.iloc[-12:-1].mean()
 
         # vetores de dados
         portfolio_weights = []
@@ -28,6 +24,9 @@ class markowitz (Turing_quant_models):
 
         # simulando diversos portfolios
         for i in range(num_portfolios):
+
+            if (plotProgress):
+                self.printProgressBar(i, num_portfolios)
 
             # construindo o vetor de pesos
             weights = np.array(np.random.uniform(
@@ -51,6 +50,9 @@ class markowitz (Turing_quant_models):
             portfolio_vol.append(vol)
             portfolio_sharpe.append(sharpe)
 
+        if(plotEfficient):
+            self.plot_efficient_frontier(portfolio_exp_returns, portfolio_vol)
+
         # portfolio = {
         #    "Expected Returns": pd.DataFrame(portfolio_exp_returns),
         #    "Weights": pd.DataFrame(portfolio_pesos),
@@ -66,6 +68,13 @@ class markowitz (Turing_quant_models):
 
         return float(1 + portfolio)
 
+    def plot_efficient_frontier (self, returns, risk):
+        plt.scatter(risk, returns)
+        plt.title("Efficient Frontier")
+        plt.xlabel("Volatily")
+        plt.ylabel("Expected return")
+        plt.show()
+
     def backtesting(self, start_date, years, plot=True):
 
         returns_model = []  # retorno do modelo
@@ -77,9 +86,11 @@ class markowitz (Turing_quant_models):
 
         for i in range(start, end):
 
+            self.printProgressBar(i-start , end-start )
+
             returns_model.append(self.markowitz(self.returns_monthly, i))
 
-            returns_baseline.append(self.returns_monthly.iloc[i].mean())
+            returns_baseline.append(1 + self.returns_monthly.iloc[i].mean())
 
         returns_model = pd.DataFrame(returns_model)
         returns_baseline = pd.DataFrame(returns_baseline)
