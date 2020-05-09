@@ -1,11 +1,24 @@
 # Turing-Quant-Models
 
-Turing Quant library
+Este repositório contém a biblioteca de estratégias de investimento do Grupo Turing. 
 
-Turing_quant_models - Parental class
+## Instalação
 
-Inherited classes:
+Crie um ambiente virtual
+```
+$ virtualenv .quantenv
+```
 
-Markowitz - Efficient Frontier 
+Instale os requirements
 
-Momentum - Time Series Momentum
+```
+$ pip install -r requirements.txt
+```
+
+## Utilização
+
+
+
+## Feito por:
+
+Lucas Leme Santos
