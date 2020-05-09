@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from pandas_datareader import data
-import yfinance as yf
 
 from turing_quant_models import Turing_quant_models
 
